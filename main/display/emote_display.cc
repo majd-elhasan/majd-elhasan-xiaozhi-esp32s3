@@ -3,6 +3,7 @@
 // Standard C++ headers
 #include <cstring>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <tuple>
 #include <algorithm>
@@ -13,6 +14,7 @@
 #include <time.h>
 
 // ESP-IDF headers
+#include <esp_err.h>
 #include <esp_log.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_timer.h>
@@ -67,7 +69,27 @@ static void OnFlushCallback(int x_start, int y_start, int x_end, int y_end, cons
     }
 }
 
-// ============================================================================
+static void UpdateEmotionLabel(emote_handle_t handle, const char* const text)
+{
+    if (!handle) {
+        return;
+    }
+
+    if (emote_lock(handle) != ESP_OK) {
+        return;
+    }
+
+    gfx_obj_t* label = emote_get_obj_by_name(handle, EMT_DEF_ELEM_DEFAULT_LABEL);
+    if (label) {
+        const bool show_text = (text != nullptr && text[0] != '\0');
+        gfx_label_set_text(label, show_text ? text : "");
+        gfx_obj_set_visible(label, show_text);
+    }
+
+    emote_unlock(handle);
+}
+
+// ============================================================================ 
 // Graphics Initialization Functions
 // ============================================================================
 
@@ -138,7 +160,15 @@ void EmoteDisplay::SetEmotion(const char* const emotion)
 {
     ESP_LOGI(TAG, "SetEmotion: %s", emotion);
     if (emote_handle_ && emotion && strlen(emotion) > 0) {
-        emote_set_anim_emoji(emote_handle_, emotion);
+        current_emotion_ = emotion;
+        esp_err_t err = emote_set_anim_emoji(emote_handle_, emotion);
+        if (err != ESP_OK) {
+            ESP_LOGW(TAG, "Failed to set emoji animation \"%s\": %s", emotion, esp_err_to_name(err));
+        }
+        UpdateEmotionLabel(emote_handle_, emotion);
+    } else if (emotion == nullptr || emotion[0] == '\0') {
+        current_emotion_.clear();
+        UpdateEmotionLabel(emote_handle_, nullptr);
     }
 }
 
@@ -157,6 +187,7 @@ void EmoteDisplay::SetChatMessage(const char* const role, const char* const cont
             emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SPEAK, content);
         }
     }
+    UpdateEmotionLabel(emote_handle_, current_emotion_.c_str());
 }
 
 void EmoteDisplay::SetStatus(const char* const status)
@@ -173,6 +204,7 @@ void EmoteDisplay::SetStatus(const char* const status)
             emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SET, NULL);
         }
     }
+    UpdateEmotionLabel(emote_handle_, current_emotion_.c_str());
 }
 
 void EmoteDisplay::ShowNotification(const char* notification, int duration_ms)
@@ -181,6 +213,7 @@ void EmoteDisplay::ShowNotification(const char* notification, int duration_ms)
     if (emote_handle_ && notification && strlen(notification) > 0) {
         emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SYS, notification);
     }
+    UpdateEmotionLabel(emote_handle_, current_emotion_.c_str());
 }
 
 void EmoteDisplay::UpdateStatusBar(bool update_all)

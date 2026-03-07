@@ -92,6 +92,10 @@ private:
         boot_button_.OnClick([this]() {
             Application::GetInstance().ToggleChatState();
         });
+        boot_button_.OnMultipleClick([this]() {
+            ESP_LOGI(TAG, "Boot button clicked 7 times, entering WiFi AP config mode");
+            EnterWifiConfigMode();
+        }, 7);
     }
 
 public:

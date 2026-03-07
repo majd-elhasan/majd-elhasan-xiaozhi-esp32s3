@@ -363,7 +363,6 @@ void LcdDisplay::SetupUI() {
     auto lvgl_theme = static_cast<LvglTheme*>(current_theme_);
     auto text_font = lvgl_theme->text_font()->font();
     auto icon_font = lvgl_theme->icon_font()->font();
-    auto large_icon_font = lvgl_theme->large_icon_font()->font();
 
     auto screen = lv_screen_active();
     lv_obj_set_style_text_font(screen, text_font, 0);
@@ -491,9 +490,12 @@ void LcdDisplay::SetupUI() {
     // Display AI logo while booting
     emoji_label_ = lv_label_create(screen);
     lv_obj_center(emoji_label_);
-    lv_obj_set_style_text_font(emoji_label_, large_icon_font, 0);
+    lv_obj_set_style_text_font(emoji_label_, text_font, 0);
     lv_obj_set_style_text_color(emoji_label_, lvgl_theme->text_color(), 0);
-    lv_label_set_text(emoji_label_, FONT_AWESOME_MICROCHIP_AI);
+    lv_obj_set_width(emoji_label_, LV_HOR_RES - lvgl_theme->spacing(16));
+    lv_label_set_long_mode(emoji_label_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_align(emoji_label_, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_text(emoji_label_, "emotion: boot");
 }
 #if CONFIG_IDF_TARGET_ESP32P4
 #define  MAX_MESSAGES 40
@@ -826,6 +828,9 @@ void LcdDisplay::SetupUI() {
     emoji_label_ = lv_label_create(emoji_box_);
     lv_obj_set_style_text_font(emoji_label_, large_icon_font, 0);
     lv_obj_set_style_text_color(emoji_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_width(emoji_label_, LV_HOR_RES - lvgl_theme->spacing(16));
+    lv_label_set_long_mode(emoji_label_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_align(emoji_label_, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_text(emoji_label_, FONT_AWESOME_MICROCHIP_AI);
 
     emoji_image_ = lv_img_create(emoji_box_);
@@ -995,7 +1000,19 @@ void LcdDisplay::SetChatMessage(const char* role, const char* content) {
     if (chat_message_label_ == nullptr) {
         return;
     }
-    lv_label_set_text(chat_message_label_, content);
+
+    const char* safe_content = (content != nullptr) ? content : "";
+    if (safe_content[0] == '\0') {
+        lv_label_set_text(chat_message_label_, "");
+        return;
+    }
+
+    if (role != nullptr && role[0] != '\0') {
+        std::string line = std::string(role) + ": " + safe_content;
+        lv_label_set_text(chat_message_label_, line.c_str());
+    } else {
+        lv_label_set_text(chat_message_label_, safe_content);
+    }
 }
 
 void LcdDisplay::ClearChatMessages() {
@@ -1008,25 +1025,31 @@ void LcdDisplay::ClearChatMessages() {
 #endif
 
 void LcdDisplay::SetEmotion(const char* emotion) {
-    // Stop any running GIF animation
+    DisplayLockGuard lock(this);
+
+    // Always use plain text emotion for easier debugging/iteration.
     if (gif_controller_) {
-        DisplayLockGuard lock(this);
         gif_controller_->Stop();
         gif_controller_.reset();
     }
 
-    if (emoji_image_ == nullptr || emoji_label_ == nullptr) {
+    if (emoji_label_ == nullptr) {
         return;
     }
 
-    // Temporary debug mode: show raw emotion text instead of emoji/icon.
-    const char* emotion_text = (emotion != nullptr && strlen(emotion) > 0) ? emotion : "neutral";
-    DisplayLockGuard lock(this);
-    auto text_font = static_cast<LvglTheme*>(current_theme_)->text_font()->font();
-    lv_obj_set_style_text_font(emoji_label_, text_font, 0);
-    lv_label_set_text(emoji_label_, emotion_text);
-    lv_obj_add_flag(emoji_image_, LV_OBJ_FLAG_HIDDEN);
+    auto font = static_cast<LvglTheme*>(current_theme_)-> large_icon_font()->font();
+    lv_obj_set_style_text_font(emoji_label_, font, 0);
+    const char* utf8 = font_awesome_get_utf8(emotion);
+    if (utf8 != nullptr){
+        lv_label_set_text(emoji_label_, utf8);
+    } else{
+        lv_label_set_text(emoji_label_, FONT_AWESOME_MICROCHIP_AI);
+    }
     lv_obj_remove_flag(emoji_label_, LV_OBJ_FLAG_HIDDEN);
+
+    if (emoji_image_ != nullptr) {
+        lv_obj_add_flag(emoji_image_, LV_OBJ_FLAG_HIDDEN);
+    }
 }
 
 void LcdDisplay::SetTheme(Theme* theme) {
@@ -1077,6 +1100,7 @@ void LcdDisplay::SetTheme(Theme* theme) {
     lv_obj_set_style_text_color(mute_label_, lvgl_theme->text_color(), 0);
     lv_obj_set_style_text_color(battery_label_, lvgl_theme->text_color(), 0);
     lv_obj_set_style_text_color(emoji_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_font(emoji_label_, text_font, 0);
 
     // If we have the chat message style, update all message bubbles
 #if CONFIG_USE_WECHAT_MESSAGE_STYLE

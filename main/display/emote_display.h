@@ -36,6 +36,7 @@ private:
     virtual void Unlock() override;
 
     emote_handle_t emote_handle_ = nullptr;
+    std::string current_emotion_;
 
 };
 
