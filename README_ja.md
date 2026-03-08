@@ -2,39 +2,43 @@
 
 (日本語 | [中文](README_zh.md) | [English](README.md) | [العربية](README_ar.md))
 
-## ESP32-S3 Project Pinout (With PSRAM)
+## ESP32-S3 Project Pinout (With PSRAM + microSD-ready SPI)
 
 This repository variant is focused on an ESP32-S3 module with external PSRAM.
 
-### Display (240x240 ST7789 via SPI)
+### Shared SPI Bus (Display + microSD)
 
-| Display Signal | ESP32-S3 GPIO |
-|---|---|
-| SCK | GPIO7 |
-| MOSI | GPIO6 |
-| RST | GPIO15 |
-| DC | GPIO16 |
-| CS | GPIO5 |
-| BL | GPIO17 |
+| Signal | ESP32-S3 GPIO | Used By |
+|---|---|---|
+| SCK | GPIO12 | Display + microSD |
+| MOSI | GPIO11 | Display + microSD |
+| MISO | GPIO13 | microSD |
+| LCD_CS | GPIO10 | Display |
+| SD_CS | GPIO14 | microSD |
+| LCD_DC | GPIO9 | Display |
+| LCD_RST | GPIO8 | Display |
+| LCD_BL | GPIO7 | Display |
 
 ### Microphone (I2S RX, INMP441/ICS43434 type)
 
 | Mic Signal | ESP32-S3 GPIO |
 |---|---|
-| BCLK | GPIO44 |
-| LRCK / WS | GPIO9 |
-| DOUT / SD | GPIO1 |
+| BCLK | GPIO4 |
+| LRCK / WS | GPIO5 |
+| DOUT / SD | GPIO6 |
 | L/R | GND |
 
 ### Speaker Amplifier (I2S TX, MAX98357 type)
 
 | Amp Signal | ESP32-S3 GPIO |
 |---|---|
-| BCLK | GPIO7 |
-| LRCK | GPIO4 |
-| DIN | GPIO2 |
+| BCLK | GPIO16 |
+| LRCK | GPIO17 |
+| DIN | GPIO18 |
 | SD | VIN |
-| GAIN | GND |`n`n## はじめに
+| GAIN | GND |
+
+## はじめに
 
 👉 [人間：AIにカメラを装着 vs AI：その場で飼い主が3日間髪を洗っていないことを発見【bilibili】](https://www.bilibili.com/video/BV1bpjgzKEhd/)
 

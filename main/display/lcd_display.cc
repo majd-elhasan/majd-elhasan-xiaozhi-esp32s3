@@ -21,6 +21,7 @@
 LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
 LV_FONT_DECLARE(BUILTIN_ICON_FONT);
 LV_FONT_DECLARE(font_awesome_30_4);
+LV_FONT_DECLARE(lv_font_dejavu_16_persian_hebrew);
 
 void LcdDisplay::InitializeLcdThemes() {
     auto text_font = std::make_shared<LvglBuiltInFont>(&BUILTIN_TEXT_FONT);
@@ -933,6 +934,8 @@ void LcdDisplay::SetupUI() {
     lv_label_set_text(chat_message_label_, "");
     lv_obj_set_width(chat_message_label_, LV_HOR_RES - lvgl_theme->spacing(8));
     lv_label_set_long_mode(chat_message_label_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_font(chat_message_label_, &lv_font_dejavu_16_persian_hebrew, 0);
+    lv_obj_set_style_base_dir(chat_message_label_, LV_BASE_DIR_AUTO, 0);
     lv_obj_set_style_text_align(chat_message_label_, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_style_text_color(chat_message_label_, lvgl_theme->text_color(), 0);
     lv_obj_align(chat_message_label_, LV_ALIGN_CENTER, 0, 0);
@@ -1007,12 +1010,8 @@ void LcdDisplay::SetChatMessage(const char* role, const char* content) {
         return;
     }
 
-    if (role != nullptr && role[0] != '\0') {
-        std::string line = std::string(role) + ": " + safe_content;
-        lv_label_set_text(chat_message_label_, line.c_str());
-    } else {
-        lv_label_set_text(chat_message_label_, safe_content);
-    }
+    (void)role;
+    lv_label_set_text(chat_message_label_, safe_content);
 }
 
 void LcdDisplay::ClearChatMessages() {
@@ -1175,6 +1174,8 @@ void LcdDisplay::SetTheme(Theme* theme) {
     // Simple UI mode - just update the main chat message
     if (chat_message_label_ != nullptr) {
         lv_obj_set_style_text_color(chat_message_label_, lvgl_theme->text_color(), 0);
+        lv_obj_set_style_text_font(chat_message_label_, &lv_font_dejavu_16_persian_hebrew, 0);
+        lv_obj_set_style_base_dir(chat_message_label_, LV_BASE_DIR_AUTO, 0);
     }
     
     if (emoji_label_ != nullptr) {

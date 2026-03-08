@@ -29,9 +29,20 @@ private:
     Button volume_down_button_;
 
     void InitDisplaySpi() {
+        // Keep SD card deselected while we only drive the LCD on the shared SPI bus.
+        gpio_config_t sd_cs_gpio_config = {
+            .pin_bit_mask = 1ULL << SD_SPI_CS_PIN,
+            .mode = GPIO_MODE_OUTPUT,
+            .pull_up_en = GPIO_PULLUP_ENABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        ESP_ERROR_CHECK(gpio_config(&sd_cs_gpio_config));
+        ESP_ERROR_CHECK(gpio_set_level(SD_SPI_CS_PIN, 1));
+
         spi_bus_config_t bus_cfg = {};
         bus_cfg.mosi_io_num = DISPLAY_SPI_MOSI_PIN;
-        bus_cfg.miso_io_num = GPIO_NUM_NC;
+        bus_cfg.miso_io_num = DISPLAY_SPI_MISO_PIN;
         bus_cfg.sclk_io_num = DISPLAY_SPI_SCK_PIN;
         bus_cfg.quadwp_io_num = GPIO_NUM_NC;
         bus_cfg.quadhd_io_num = GPIO_NUM_NC;

@@ -4,39 +4,43 @@
 
 <div dir="rtl">
 
-## مخطط توصيل ESP32-S3 لمشروعك (مع PSRAM)
+## مخطط توصيل ESP32-S3 لمشروعك (مع PSRAM وSPI جاهز لـ microSD)
 
 هذه النسخة من المستودع مخصصة لوحدة ESP32-S3 المزودة بذاكرة PSRAM خارجية.
 
-### الشاشة (ST7789 بدقة 240x240 عبر SPI)
+### ناقل SPI مشترك (الشاشة + microSD)
 
-| إشارة الشاشة | GPIO في ESP32-S3 |
-|---|---|
-| SCK | GPIO7 |
-| MOSI | GPIO6 |
-| RST | GPIO15 |
-| DC | GPIO16 |
-| CS | GPIO5 |
-| BL | GPIO17 |
+| الإشارة | GPIO في ESP32-S3 | الاستخدام |
+|---|---|---|
+| SCK | GPIO12 | الشاشة + microSD |
+| MOSI | GPIO11 | الشاشة + microSD |
+| MISO | GPIO13 | microSD |
+| LCD_CS | GPIO10 | الشاشة |
+| SD_CS | GPIO14 | microSD |
+| LCD_DC | GPIO9 | الشاشة |
+| LCD_RST | GPIO8 | الشاشة |
+| LCD_BL | GPIO7 | الشاشة |
 
 ### وحدة الميكروفون (I2S RX، نوع INMP441/ICS43434)
 
 | إشارة الميكروفون | GPIO في ESP32-S3 |
 |---|---|
-| BCLK | GPIO44 |
-| LRCK / WS | GPIO9 |
-| DOUT / SD | GPIO1 |
+| BCLK | GPIO4 |
+| LRCK / WS | GPIO5 |
+| DOUT / SD | GPIO6 |
 | L/R | GND |
 
 ### وحدة السماعة/المضخم (I2S TX، نوع MAX98357)
 
 | إشارة المضخم | GPIO في ESP32-S3 |
 |---|---|
-| BCLK | GPIO7 |
-| LRCK | GPIO4 |
-| DIN | GPIO2 |
+| BCLK | GPIO16 |
+| LRCK | GPIO17 |
+| DIN | GPIO18 |
 | SD | VIN |
-| GAIN | GND |`n`n## المقدمة
+| GAIN | GND |
+
+## المقدمة
 
 👉 [الإنسان: يضيف كاميرا للذكاء الاصطناعي vs الذكاء الاصطناعي: يكتشف فورًا أن صاحبه لم يغسل شعره منذ 3 أيام【bilibili】](https://www.bilibili.com/video/BV1bpjgzKEhd/)
 

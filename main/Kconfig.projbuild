@@ -484,7 +484,7 @@ choice BOARD_TYPE
         depends on IDF_TARGET_ESP32S3
     config BOARD_TYPE_ESP32WROOM32
         bool "ESP32-WROOM-32 (Custom SPI LCD + I2S)"
-        depends on IDF_TARGET_ESP32
+        depends on IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
 endchoice
 
 choice
