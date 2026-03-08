@@ -12,6 +12,7 @@
 #include <esp_lvgl_port.h>
 #include <esp_psram.h>
 #include <cstring>
+#include <cstdint>
 #include <src/misc/cache/lv_cache.h>
 
 #include "board.h"
@@ -22,6 +23,87 @@ LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
 LV_FONT_DECLARE(BUILTIN_ICON_FONT);
 LV_FONT_DECLARE(font_awesome_30_4);
 LV_FONT_DECLARE(lv_font_dejavu_16_persian_hebrew);
+
+static bool DecodeNextUtf8Codepoint(const char*& p, uint32_t& cp) {
+    const uint8_t c0 = static_cast<uint8_t>(*p);
+    if (c0 == 0) {
+        return false;
+    }
+    if ((c0 & 0x80) == 0) {
+        cp = c0;
+        p += 1;
+        return true;
+    }
+    if ((c0 & 0xE0) == 0xC0) {
+        const uint8_t c1 = static_cast<uint8_t>(p[1]);
+        if ((c1 & 0xC0) != 0x80) {
+            p += 1;
+            cp = 0xFFFD;
+            return true;
+        }
+        cp = ((c0 & 0x1F) << 6) | (c1 & 0x3F);
+        p += 2;
+        return true;
+    }
+    if ((c0 & 0xF0) == 0xE0) {
+        const uint8_t c1 = static_cast<uint8_t>(p[1]);
+        const uint8_t c2 = static_cast<uint8_t>(p[2]);
+        if (((c1 & 0xC0) != 0x80) || ((c2 & 0xC0) != 0x80)) {
+            p += 1;
+            cp = 0xFFFD;
+            return true;
+        }
+        cp = ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
+        p += 3;
+        return true;
+    }
+    if ((c0 & 0xF8) == 0xF0) {
+        const uint8_t c1 = static_cast<uint8_t>(p[1]);
+        const uint8_t c2 = static_cast<uint8_t>(p[2]);
+        const uint8_t c3 = static_cast<uint8_t>(p[3]);
+        if (((c1 & 0xC0) != 0x80) || ((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80)) {
+            p += 1;
+            cp = 0xFFFD;
+            return true;
+        }
+        cp = ((c0 & 0x07) << 18) | ((c1 & 0x3F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
+        p += 4;
+        return true;
+    }
+
+    p += 1;
+    cp = 0xFFFD;
+    return true;
+}
+
+static bool ContainsArabicScript(const char* text) {
+    if (text == nullptr) {
+        return false;
+    }
+    const char* p = text;
+    uint32_t cp = 0;
+    while (DecodeNextUtf8Codepoint(p, cp)) {
+        if ((cp >= 0x0600 && cp <= 0x06FF) ||
+            (cp >= 0x0750 && cp <= 0x077F) ||
+            (cp >= 0x08A0 && cp <= 0x08FF) ||
+            (cp >= 0xFB50 && cp <= 0xFDFF) ||
+            (cp >= 0xFE70 && cp <= 0xFEFF)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static const lv_font_t* SelectChatFontForText(const char* text) {
+    return ContainsArabicScript(text) ? &lv_font_dejavu_16_persian_hebrew : &BUILTIN_TEXT_FONT;
+}
+
+static bool HasMultipleLines(const char* text) {
+    if (text == nullptr) {
+        return false;
+    }
+    return std::strchr(text, '\n') != nullptr;
+}
 
 void LcdDisplay::InitializeLcdThemes() {
     auto text_font = std::make_shared<LvglBuiltInFont>(&BUILTIN_TEXT_FONT);
@@ -569,6 +651,8 @@ void LcdDisplay::SetChatMessage(const char* role, const char* content) {
 
     // Create the message text
     lv_obj_t* msg_text = lv_label_create(msg_bubble);
+    lv_obj_set_style_text_font(msg_text, SelectChatFontForText(content), 0);
+    lv_obj_set_style_base_dir(msg_text, LV_BASE_DIR_AUTO, 0);
     lv_label_set_text(msg_text, content);
     
     // Calculate bubble width constraints
@@ -934,7 +1018,7 @@ void LcdDisplay::SetupUI() {
     lv_label_set_text(chat_message_label_, "");
     lv_obj_set_width(chat_message_label_, LV_HOR_RES - lvgl_theme->spacing(8));
     lv_label_set_long_mode(chat_message_label_, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_style_text_font(chat_message_label_, &lv_font_dejavu_16_persian_hebrew, 0);
+    lv_obj_set_style_text_font(chat_message_label_, &BUILTIN_TEXT_FONT, 0);
     lv_obj_set_style_base_dir(chat_message_label_, LV_BASE_DIR_AUTO, 0);
     lv_obj_set_style_text_align(chat_message_label_, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_style_text_color(chat_message_label_, lvgl_theme->text_color(), 0);
@@ -1011,6 +1095,9 @@ void LcdDisplay::SetChatMessage(const char* role, const char* content) {
     }
 
     (void)role;
+    lv_obj_set_style_text_font(chat_message_label_, SelectChatFontForText(safe_content), 0);
+    lv_obj_set_style_base_dir(chat_message_label_, LV_BASE_DIR_AUTO, 0);
+    lv_obj_set_style_text_line_space(chat_message_label_, HasMultipleLines(safe_content) ? -2 : 0, 0);
     lv_label_set_text(chat_message_label_, safe_content);
 }
 
@@ -1174,7 +1261,7 @@ void LcdDisplay::SetTheme(Theme* theme) {
     // Simple UI mode - just update the main chat message
     if (chat_message_label_ != nullptr) {
         lv_obj_set_style_text_color(chat_message_label_, lvgl_theme->text_color(), 0);
-        lv_obj_set_style_text_font(chat_message_label_, &lv_font_dejavu_16_persian_hebrew, 0);
+        lv_obj_set_style_text_font(chat_message_label_, &BUILTIN_TEXT_FONT, 0);
         lv_obj_set_style_base_dir(chat_message_label_, LV_BASE_DIR_AUTO, 0);
     }
     
