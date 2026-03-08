@@ -1,6 +1,40 @@
 # An MCP-based Chatbot
 
-(English | [中文](README_zh.md) | [日本語](README_ja.md))
+(English | [中文](README_zh.md) | [日本語](README_ja.md) | [العربية](README_ar.md))
+
+## ESP32-S3 Project Pinout (With PSRAM)
+
+This repository variant is focused on an ESP32-S3 module with external PSRAM.
+
+### Display (240x240 ST7789 via SPI)
+
+| Display Signal | ESP32-S3 GPIO |
+|---|---|
+| SCK | GPIO7 |
+| MOSI | GPIO6 |
+| RST | GPIO15 |
+| DC | GPIO16 |
+| CS | GPIO5 |
+| BL | GPIO17 |
+
+### Microphone (I2S RX, INMP441/ICS43434 type)
+
+| Mic Signal | ESP32-S3 GPIO |
+|---|---|
+| BCLK | GPIO44 |
+| LRCK / WS | GPIO9 |
+| DOUT / SD | GPIO1 |
+| L/R | GND |
+
+### Speaker Amplifier (I2S TX, MAX98357 type)
+
+| Amp Signal | ESP32-S3 GPIO |
+|---|---|
+| BCLK | GPIO7 |
+| LRCK | GPIO4 |
+| DIN | GPIO2 |
+| SD | VIN |
+| GAIN | GND |
 
 ## Introduction
 
