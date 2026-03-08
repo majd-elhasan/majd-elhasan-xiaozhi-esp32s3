@@ -29,6 +29,7 @@ set(SOURCES "audio/audio_codec.cc"
             "protocols/mqtt_protocol.cc"
             "protocols/websocket_protocol.cc"
             "mcp_server.cc"
+            "quran_player.cc"
             "system_info.cc"
             "application.cc"
             "ota.cc"
@@ -817,6 +818,7 @@ idf_component_register(SRCS ${SOURCES}
                         esp_driver_gpio
                         esp_driver_uart
                         esp_driver_spi
+                        esp_driver_sdspi
                         esp_driver_i2c
                         esp_driver_i2s
                         esp_driver_jpeg
@@ -824,6 +826,8 @@ idf_component_register(SRCS ${SOURCES}
                         esp_app_format
                         app_update
                         spi_flash
+                        fatfs
+                        sdmmc
                         console
                         efuse
                         bt

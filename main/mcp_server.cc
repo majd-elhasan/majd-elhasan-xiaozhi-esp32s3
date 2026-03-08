@@ -14,6 +14,7 @@
 #include "display.h"
 #include "oled_display.h"
 #include "board.h"
+#include "quran_player.h"
 #include "settings.h"
 #include "lvgl_theme.h"
 #include "lvgl_display.h"
@@ -120,6 +121,40 @@ void McpServer::AddCommonTools() {
             });
     }
 #endif
+
+    auto& quran_player = QuranPlayer::GetInstance();
+    AddTool("self.quran.get_status",
+        "Get Quran SD-card playback status and mount information.",
+        PropertyList(),
+        [&quran_player](const PropertyList& properties) -> ReturnValue {
+            return quran_player.GetStatusJson();
+        });
+
+    AddTool("self.quran.resolve_surah",
+        "Resolve a surah query by index or transliterated name (e.g. 2, baqarah, yasin).",
+        PropertyList({
+            Property("query", kPropertyTypeString)
+        }),
+        [&quran_player](const PropertyList& properties) -> ReturnValue {
+            return quran_player.ResolveSurahJson(properties["query"].value<std::string>());
+        });
+
+    AddTool("self.quran.play_ayah",
+        "Play a Quran ayah from SD card. Surah can be index or transliterated name. Ayah can be index or known alias (e.g. ayatul_kursi for surah 2).",
+        PropertyList({
+            Property("surah", kPropertyTypeString),
+            Property("ayah", kPropertyTypeString, std::string("1"))
+        }),
+        [&quran_player](const PropertyList& properties) -> ReturnValue {
+            std::string error;
+            if (!quran_player.PlayByQuery(
+                properties["surah"].value<std::string>(),
+                properties["ayah"].value<std::string>(),
+                error, true)) {
+                throw std::runtime_error(error);
+            }
+            return true;
+        });
 
     // Restore the original tools list to the end of the tools list
     tools_.insert(tools_.end(), original_tools.begin(), original_tools.end());

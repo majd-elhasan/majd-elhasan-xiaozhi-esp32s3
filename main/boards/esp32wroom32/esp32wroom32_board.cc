@@ -6,6 +6,7 @@
 #include "button.h"
 #include "assets/lang_config.h"
 #include "led/single_led.h"
+#include "quran_player.h"
 
 #include "board_config.h"
 #include <wifi_station.h>
@@ -119,6 +120,13 @@ public:
         ESP_LOGI(TAG, "Init Esp32Wroom32Board");
         InitDisplaySpi();
         InitializeSt7789Display();
+        QuranPlayer::GetInstance().Initialize(
+            SPI2_HOST,
+            DISPLAY_SPI_SCK_PIN,
+            DISPLAY_SPI_MOSI_PIN,
+            DISPLAY_SPI_MISO_PIN,
+            SD_SPI_CS_PIN,
+            DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint16_t));
         InitButtons();
     }
 
