@@ -2,11 +2,14 @@ tmp/
 components/
 managed_components/
 build/
+build-esp32s3-custom/
 dist/
 .vscode/
 .devcontainer/
 sdkconfig.old
 sdkconfig
+sd-card-test-esp32s3-n16r8/
+sd-card-test-esp32s3-n16r8-idf/
 dependencies.lock
 .env
 releases/
