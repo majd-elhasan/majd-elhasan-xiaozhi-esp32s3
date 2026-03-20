@@ -198,6 +198,11 @@ bool QuranPlayer::ResolveAyahQuery(uint8_t surah, const std::string& query, uint
         ESP_LOGI(TAG, "ResolveAyahQuery: special ayah detected (ayat al-kursi) => ayah=255");
         return true;
     }
+    if (surah == 2 && (normalized == "ayataddain" || normalized == "ayatuddain" || normalized == "dayn" || normalized == "dain")) {
+        ayah = 282;
+        ESP_LOGI(TAG, "ResolveAyahQuery: special ayah detected (ayat ad-dain) => ayah=282");
+        return true;
+    }
 
     ESP_LOGW(TAG, "ResolveAyahQuery: could not resolve ayah from '%s' for surah=%u", query.c_str(), surah);
     return false;

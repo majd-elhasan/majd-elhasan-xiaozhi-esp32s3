@@ -5,6 +5,7 @@
 ## ESP32-S3 Project Pinout (With PSRAM + microSD-ready SPI)
 
 This repository variant is focused on an ESP32-S3 module with external PSRAM.
+Default screen tested: 240x240 SPI LCD (update if you use a different panel).
 
 ### Shared SPI Bus (Display + microSD)
 
