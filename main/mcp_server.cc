@@ -124,7 +124,7 @@ void McpServer::AddCommonTools() {
 
     auto& quran_player = QuranPlayer::GetInstance();
     AddTool("self.quran.get_status",
-        "Get Quran SD-card playback status and mount information.",
+        "Get Quran playback status (audio is served by a remote MCP client device).",
         PropertyList(),
         [&quran_player](const PropertyList& properties) -> ReturnValue {
             return quran_player.GetStatusJson();
@@ -140,7 +140,7 @@ void McpServer::AddCommonTools() {
         });
 
     AddTool("self.quran.play_ayah",
-        "Play a Quran ayah from SD card. Surah can be index or transliterated name. Ayah can be index or known alias (e.g. ayatul_kursi for surah 2).",
+        "Request Quran ayah playback via remote MCP client. Surah can be index or transliterated name. Ayah can be index or known alias (e.g. ayatul_kursi for surah 2).",
         PropertyList({
             Property("surah", kPropertyTypeString),
             Property("ayah", kPropertyTypeString, std::string("1"))

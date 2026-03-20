@@ -7,7 +7,6 @@
 
 #include <cJSON.h>
 #include <driver/spi_common.h>
-#include <sdmmc_cmd.h>
 
 struct SurahInfo {
     uint8_t index;
@@ -61,7 +60,6 @@ private:
 
     std::atomic<bool> mounted_{false};
     std::atomic<bool> playing_{false};
-    sdmmc_card_t* card_ = nullptr;
 };
 
 #endif  // QURAN_PLAYER_H_
