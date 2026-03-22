@@ -119,7 +119,7 @@ endchoice
 
 choice BOARD_TYPE
     prompt "Board Type"
-    default BOARD_TYPE_ESP32WROOM32
+    default BOARD_TYPE_ESP32S3_N16R8
     help
         Board type. 开发板类型
     config BOARD_TYPE_BREAD_COMPACT_WIFI
@@ -482,9 +482,9 @@ choice BOARD_TYPE
     config BOARD_TYPE_HU_087
         bool "HU-087"
         depends on IDF_TARGET_ESP32S3
-    config BOARD_TYPE_ESP32WROOM32
-        bool "ESP32-WROOM-32 (Custom SPI LCD + I2S)"
-        depends on IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
+    config BOARD_TYPE_ESP32S3_N16R8
+        bool "ESP32-S3 N16R8 DevKit (240x240 LCD + shared SD)"
+        depends on IDF_TARGET_ESP32S3
 endchoice
 
 choice

@@ -642,11 +642,11 @@ elseif(CONFIG_BOARD_TYPE_HU_087)
     set(BOARD_TYPE "hu-087")
     set(BUILTIN_TEXT_FONT font_puhui_basic_14_1)
     set(BUILTIN_ICON_FONT font_awesome_14_1)
-elseif(CONFIG_BOARD_TYPE_ESP32WROOM32)
-    set(BOARD_TYPE "esp32wroom32")
+elseif(CONFIG_BOARD_TYPE_ESP32S3_N16R8)
+    set(BOARD_TYPE "esp32s3-n16r8")
+    # Use Noto font to render Arabic glyphs correctly on 240x240 LCD
     set(BUILTIN_TEXT_FONT font_noto_basic_20_4)
-    set(BUILTIN_ICON_FONT font_awesome_14_1)
-    set(DEFAULT_EMOJI_COLLECTION twemoji_64)
+    set(BUILTIN_ICON_FONT font_awesome_20_4)
 endif()
 
 file(GLOB BOARD_SOURCES

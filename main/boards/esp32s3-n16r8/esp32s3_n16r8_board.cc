@@ -16,9 +16,9 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 
-#define TAG "Esp32Wroom32Board"
+#define TAG "Esp32S3N16R8Board"
 
-class Esp32Wroom32Board : public WifiBoard {
+class Esp32S3N16R8Board : public WifiBoard {
 private:
     esp_lcd_panel_io_handle_t panel_io_ = nullptr;
     esp_lcd_panel_handle_t panel_ = nullptr;
@@ -101,18 +101,21 @@ private:
     }
 
     void InitButtons() {
+        auto enter_ap_mode = [this]() {
+            ESP_LOGI(TAG, "Boot button trigger => entering WiFi AP config mode");
+            EnterWifiConfigMode();
+        };
+
         boot_button_.OnClick([this]() {
             Application::GetInstance().ToggleChatState();
         });
-        boot_button_.OnMultipleClick([this]() {
-            ESP_LOGI(TAG, "Boot button clicked 7 times, entering WiFi AP config mode");
-            EnterWifiConfigMode();
-        }, 7);
+        boot_button_.OnMultipleClick(enter_ap_mode, 7);
+        boot_button_.OnLongPress(enter_ap_mode);
     }
 
 public:
-    Esp32Wroom32Board() :
-        boot_button_(BOOT_BUTTON_GPIO),
+    Esp32S3N16R8Board() :
+        boot_button_(BOOT_BUTTON_GPIO, false, 7000 /* long press ms */),
         touch_button_(TOUCH_BUTTON_GPIO),
         volume_up_button_(VOLUME_UP_BUTTON_GPIO),
         volume_down_button_(VOLUME_DOWN_BUTTON_GPIO) {
@@ -165,4 +168,4 @@ public:
     }
 };
 
-DECLARE_BOARD(Esp32Wroom32Board);
+DECLARE_BOARD(Esp32S3N16R8Board);

@@ -1,0 +1,14 @@
+{
+    "target": "esp32s3",
+    "builds": [
+        {
+            "name": "esp32s3-n16r8-st7789-sd",
+            "sdkconfig_append": [
+                "CONFIG_BOARD_TYPE_ESP32S3_N16R8=y",
+                "CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y",
+                "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions/v2/16m.csv\"",
+                "CONFIG_WAKE_WORD_DISABLED=y"
+            ]
+        }
+    ]
+}
