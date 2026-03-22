@@ -11,6 +11,7 @@
 #include <esp_err.h>
 #include <esp_lvgl_port.h>
 #include <esp_psram.h>
+#include <ctime>
 #include <cstring>
 #include <cstdint>
 #include <src/misc/cache/lv_cache.h>
@@ -1130,9 +1131,12 @@ void LcdDisplay::SetEmotion(const char* emotion) {
     const char* utf8 = font_awesome_get_utf8(emotion);
     if (utf8 != nullptr){
         lv_label_set_text(emoji_label_, utf8);
+        current_emoji_utf8_ = utf8;
     } else{
         lv_label_set_text(emoji_label_, FONT_AWESOME_MICROCHIP_AI);
+        current_emoji_utf8_ = FONT_AWESOME_MICROCHIP_AI;
     }
+    current_emoji_font_ = font;
     lv_obj_remove_flag(emoji_label_, LV_OBJ_FLAG_HIDDEN);
 
     if (emoji_image_ != nullptr) {
